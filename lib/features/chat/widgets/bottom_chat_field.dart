@@ -1,26 +1,54 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../common/utils/colors.dart';
+import '../contoller/chat_controller.dart';
 
 
 
-class BottomChatField extends StatefulWidget {
+class BottomChatField extends ConsumerStatefulWidget {
+  final String recieverUserId;
   const BottomChatField({
+    required this.recieverUserId,
+
     super.key,
+
   });
 
   @override
-  State<BottomChatField> createState() => _BottomChatFieldState();
+  ConsumerState<BottomChatField> createState() => _BottomChatFieldState();
 }
 
-class _BottomChatFieldState extends State<BottomChatField> {
+class _BottomChatFieldState extends ConsumerState<BottomChatField> {
   bool isShowSendButton = false;
+  final TextEditingController _messageController = TextEditingController();
+
+  
+  void sendTextMessage() async {
+    if(isShowSendButton) {
+      ref.read(chatControllerProvider).sendTextMessage(
+          context,
+          _messageController.text.trim(),
+          widget.recieverUserId);
+      _messageController.text = ' ';
+    }
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    _messageController.dispose();
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         Expanded(
           child: TextFormField(
+            controller: _messageController,
             onChanged: (val) {
               if(val.isNotEmpty){
                 setState(() {
@@ -101,10 +129,15 @@ class _BottomChatFieldState extends State<BottomChatField> {
           child: CircleAvatar(
             backgroundColor: const Color(0xFF128c7E),
             radius: 25,
-            child: Icon(
-              isShowSendButton ?
-              Icons.send : Icons.mic,
-              color: Colors.white,),
+            child: GestureDetector(
+
+              child: Icon(
+                isShowSendButton ?
+                Icons.send : Icons.mic,
+                color: Colors.white,),
+              onTap: sendTextMessage,
+            ),
+
           ),
         )
       ],
