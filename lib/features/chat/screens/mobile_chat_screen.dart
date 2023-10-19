@@ -6,6 +6,7 @@ import 'package:whatsapp/features/auth/controller/auth_controller.dart';
 import 'package:whatsapp/model/user_model.dart';
 import 'package:whatsapp/features/chat/widgets/chat_list.dart';
 
+import '../../call/controller/call_controller.dart';
 import '../widgets/bottom_chat_field.dart';
 
 class MobileChatScreen extends ConsumerWidget {
@@ -22,6 +23,16 @@ class MobileChatScreen extends ConsumerWidget {
     required this.isGroupChat,
     required this.profilePic,
   }) : super(key: key);
+
+  void makeCall(WidgetRef ref, BuildContext context) {
+    ref.read(callControllerProvider).makeCall(
+      context,
+      name,
+      uid,
+      profilePic,
+      isGroupChat,
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -53,7 +64,7 @@ class MobileChatScreen extends ConsumerWidget {
         centerTitle: false,
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () => makeCall(ref, context),
             icon: const Icon(Icons.video_call),
           ),
           IconButton(
