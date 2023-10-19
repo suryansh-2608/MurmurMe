@@ -9,6 +9,10 @@ import 'package:whatsapp/features/select_contacts/screens/select_contacts_screen
 import 'package:whatsapp/features/chat/screens/mobile_chat_screen.dart';
 import 'package:whatsapp/features/status/screens/confirm_status_screen.dart';
 
+import 'features/group/screen/create_group_screen.dart';
+import 'features/status/screens/status_screen.dart';
+import 'model/status_model.dart';
+
 Route<dynamic> generateRoute(RouteSettings settings) {
   switch (settings.name) {
     case LoginScreen.routeName:
@@ -19,28 +23,29 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       final verificationId = settings.arguments as String;
       return MaterialPageRoute(
         builder: (context) => OTPScreen(
-          verificationId: verificationId,),
+          verificationId: verificationId,
+        ),
       );
     case UserInformationScreen.routeName:
       return MaterialPageRoute(
         builder: (context) => const UserInformationScreen(),
       );
-
     case SelectContactsScreen.routeName:
-
       return MaterialPageRoute(
-
         builder: (context) => const SelectContactsScreen(),
       );
-
     case MobileChatScreen.routeName:
       final arguments = settings.arguments as Map<String, dynamic>;
       final name = arguments['name'];
       final uid = arguments['uid'];
+      final isGroupChat = arguments['isGroupChat'];
+      final profilePic = arguments['profilePic'];
       return MaterialPageRoute(
         builder: (context) => MobileChatScreen(
           name: name,
-            uid: uid,
+          uid: uid,
+          isGroupChat: isGroupChat,
+          profilePic: profilePic,
         ),
       );
     case ConfirmStatusScreen.routeName:
@@ -50,7 +55,17 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           file: file,
         ),
       );
-
+    case StatusScreen.routeName:
+      final status = settings.arguments as Status;
+      return MaterialPageRoute(
+        builder: (context) => StatusScreen(
+          status: status,
+        ),
+      );
+    case CreateGroupScreen.routeName:
+      return MaterialPageRoute(
+        builder: (context) => const CreateGroupScreen(),
+      );
     default:
       return MaterialPageRoute(
         builder: (context) => const Scaffold(

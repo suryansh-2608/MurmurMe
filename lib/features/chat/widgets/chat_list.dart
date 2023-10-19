@@ -14,9 +14,11 @@ import '../../../common/providers/message_reply_provider.dart';
 
 class ChatList extends ConsumerStatefulWidget {
   final String recieverUserId;
+  final bool isGroupChat;
   const ChatList({
     Key? key,
     required this.recieverUserId,
+    required this.isGroupChat,
   }) : super(key: key);
 
   @override
@@ -28,7 +30,6 @@ class _ChatListState extends ConsumerState<ChatList> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     messageController.dispose();
   }
@@ -50,17 +51,21 @@ class _ChatListState extends ConsumerState<ChatList> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<Message>>(
-        stream: ref.read(chatControllerProvider).chatStream(widget.recieverUserId),
+        stream: widget.isGroupChat
+            ? ref
+            .read(chatControllerProvider)
+            .groupChatStream(widget.recieverUserId)
+            : ref
+            .read(chatControllerProvider)
+            .chatStream(widget.recieverUserId),
         builder: (context, snapshot) {
-          if(snapshot.connectionState == ConnectionState.waiting)
-          {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Loader();
           }
 
           SchedulerBinding.instance.addPostFrameCallback((_) {
-
-            messageController.jumpTo(messageController.position.maxScrollExtent);
-
+            messageController
+                .jumpTo(messageController.position.maxScrollExtent);
           });
 
           return ListView.builder(
@@ -69,6 +74,7 @@ class _ChatListState extends ConsumerState<ChatList> {
             itemBuilder: (context, index) {
               final messageData = snapshot.data![index];
               var timeSent = DateFormat.Hm().format(messageData.timeSent);
+
               if (!messageData.isSeen &&
                   messageData.recieverid ==
                       FirebaseAuth.instance.currentUser!.uid) {
@@ -78,7 +84,8 @@ class _ChatListState extends ConsumerState<ChatList> {
                   messageData.messageId,
                 );
               }
-              if (messageData.senderId == FirebaseAuth.instance.currentUser!.uid) {
+              if (messageData.senderId ==
+                  FirebaseAuth.instance.currentUser!.uid) {
                 return MyMessageCard(
                   message: messageData.text,
                   date: timeSent,
@@ -109,7 +116,6 @@ class _ChatListState extends ConsumerState<ChatList> {
               );
             },
           );
-        }
-    );
+        });
   }
 }
