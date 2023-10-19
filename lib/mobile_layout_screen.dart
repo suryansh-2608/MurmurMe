@@ -1,9 +1,14 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:whatsapp/common/utils/colors.dart';
+import 'package:whatsapp/common/utils/utils.dart';
 import 'package:whatsapp/features/select_contacts/screens/select_contacts_screen.dart';
 import 'package:whatsapp/features/chat/widgets/contacts_list.dart';
-
+import 'package:whatsapp/features/status/screens/confirm_status_screen.dart';
+import 'package:whatsapp/features/status/screens/status_contacts_screen.dart';
+import 'dart:io';
 import 'features/auth/controller/auth_controller.dart';
 
 class MobileLayoutScreen extends ConsumerStatefulWidget {
@@ -13,12 +18,14 @@ class MobileLayoutScreen extends ConsumerStatefulWidget {
   ConsumerState<MobileLayoutScreen> createState() => _MobileLayoutScreenState();
 }
 
-class _MobileLayoutScreenState extends ConsumerState<MobileLayoutScreen>  with WidgetsBindingObserver{
+class _MobileLayoutScreenState extends ConsumerState<MobileLayoutScreen>  with WidgetsBindingObserver, TickerProviderStateMixin{
+  late TabController tabBarController;
 
 
   @override
   void initState() {
     super.initState();
+    tabBarController = TabController(length: 3, vsync: this);
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -71,12 +78,13 @@ class _MobileLayoutScreenState extends ConsumerState<MobileLayoutScreen>  with W
               onPressed: () {},
             ),
           ],
-          bottom: const TabBar(
+          bottom: TabBar(
+            controller: tabBarController,
             indicatorColor: tabColor,
             indicatorWeight: 4,
             labelColor: tabColor,
             unselectedLabelColor: Colors.grey,
-            labelStyle: TextStyle(
+            labelStyle: const TextStyle(
               fontWeight: FontWeight.bold,
             ),
             tabs: [
@@ -92,10 +100,26 @@ class _MobileLayoutScreenState extends ConsumerState<MobileLayoutScreen>  with W
             ],
           ),
         ),
-        body: const ContactsList(),
+        body: TabBarView(
+          controller: tabBarController,
+          children: const [
+          ContactsList(),
+          StatusContactsScreen(),
+            Text('Calls'),
+        ],),
         floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Navigator.pushNamed(context, SelectContactsScreen.routeName);
+          onPressed: () async {
+            if(tabBarController.index == 0)
+              {
+                Navigator.pushNamed(context, SelectContactsScreen.routeName);
+              }else{
+              File? pickedImage = await pickImageFromGallery(context);
+              if(pickedImage != null)
+                {
+                  Navigator.pushNamed(context, ConfirmStatusScreen.routeName, arguments: pickedImage);
+                }
+            }
+
           },
           backgroundColor: tabColor,
           child: const Icon(
